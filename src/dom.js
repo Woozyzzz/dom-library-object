@@ -1,152 +1,134 @@
 window.dom = {
-  // create: function (tagName) {
-  //   return document.createElement(tagName);
-  // },
+  // 查
+  find(selectors, container) {
+    return (container || document).querySelectorAll(selectors);
+  },
+  parent(node) {
+    return node.parentNode;
+  },
+  children(node) {
+    return node.children;
+  },
+  siblings(node) {
+    return Array.from(node.parentNode.children).filter((item) => item !== node);
+  },
+  previous(node) {
+    let p = node.previousSibling;
+    while (p && p.nodeType === 3) {
+      p = p.previousSibling;
+    }
+    return p;
+  },
+  next(node) {
+    let n = node.nextSibling;
+    while (n && n.nodeType === 3) {
+      n = n.nextSibling;
+    }
+    return n;
+  },
+  travel(nodeList, callback) {
+    for (let i = 0; i < nodeList.length; i++) {
+      callback.call(null, nodeList[i]);
+    }
+  },
+  index(node) {
+    const nodeList = dom.children(dom.parent(node));
+    for (let i = 0; i < nodeList.length; i++) {
+      if (nodeList[i] === node) {
+        return i;
+      }
+    }
+  },
+  // 增
   create(string) {
-    // 创建节点
-    const container = document.createElement("template");
-    container.innerHTML = string.trim();
-    return container.content.firstChild;
+    const template = document.createElement("template");
+    template.innerHTML = string.trim();
+    return template.content.firstChild;
   },
-  after(node, node2) {
-    // 新增弟弟
-    node.parentNode.insertBefore(node2, node.nextSibling);
+  before(node, referenceNode) {
+    dom.parent(referenceNode).insertBefore(node, referenceNode);
   },
-  before(node, node2) {
-    // 新增哥哥
-    node.parentNode.insertBefore(node2, node);
+  after(node, referenceNode) {
+    dom.parent(referenceNode).insertBefore(node, dom.next(referenceNode));
   },
-  append(parent, node) {
-    // 新增儿子
-    parent.appendChild(node);
+  append(node, parentNode) {
+    parentNode.appendChild(node);
   },
-  wrap(node, parent) {
-    // 新增爸爸（先创建哥哥，再作为为哥哥的儿子）
-    dom.before(node, parent);
-    dom.after(parent, node);
+  wrap(node, childNode) {
+    dom.before(node, childNode);
+    dom.append(childNode, node);
   },
+  // 删
   remove(node) {
-    // 删除节点
-    node.parentNode.removeChild(node);
+    node.remove();
     return node;
   },
-  empty(parent) {
-    // 删除孩子们
-    const childNodes = node.childNodes;
-    // const {childNodes} = node
-    const array = [];
-    let x = node.firstChild;
-    while (x) {
-      array.push(dom.remove(node.firstChild));
-      x = node.firstChild;
+  empty(node) {
+    const children = dom.children(node);
+    let array = [];
+    for (let i = 0; i < children.length; i++) {
+      array.push(dom.remove(children[i]));
     }
     return array;
   },
-  attr(node, name, value) {
-    // 读写属性(重载)
-    if (arguments.length === 3) {
-      node.setAttribute(name, value);
-    } else if (arguments.length === 2) {
-      return node.getAttribute(name);
-    }
-  },
-  text(node, string) {
-    // 读写文本内容（适配ie）
-    if (`innerText` in node) {
-      node.innerText = string; // IE
-    } else {
-      node.textContent = string; // Firefox
-    }
-  },
-  html(node, string) {
-    // 读写HTML内容（重载）
+  // 改
+  attribute(node, name, value) {
+    // 重载
     if (arguments.length === 2) {
-      node.innerHTML = string;
-    } else if (arguments.length === 1) {
-      return node.innerHTML;
+      return node.getAttribute(name);
+    } else if (arguments.length === 3) {
+      node.setAttribute(name, value);
     }
   },
   style(node, name, value) {
-    // 修改style
-    if (arguments.length === 3) {
-      node.style[name] = value;
-    } else if (arguments.length == 2) {
-      if (typeof name === `string`) {
+    // 重载
+    if (arguments.length === 2) {
+      if (typeof name === "string") {
         return node.style[name];
       } else if (name instanceof Object) {
         for (let key in name) {
           node.style[key] = name[key];
         }
       }
+    } else if (arguments.length === 3) {
+      node.style[name] = value;
     }
   },
   class: {
+    has(node, className) {
+      return node.classList.contains(className);
+    },
     add(node, className) {
-      // 添加class
       node.classList.add(className);
     },
     remove(node, className) {
-      // 删除class
       node.classList.remove(className);
     },
-    has(node, className) {
-      // 查看class是否存在
-      return node.classList.contains(className);
-    },
   },
-  on(node, eventName, fn) {
-    // 添加事件监听
-    node.addEventListener(eventName, fn);
-  },
-  off(node, eventName, fn) {
-    // 删除事件监听
-    node.removeEventListener(eventName, fn);
-  },
-  find(selector, scope) {
-    // 获取标签们
-    return (scope || document).querySelectorAll(selector);
-  },
-  parent(node) {
-    // 获取父元素
-    return node.parentNode;
-  },
-  children(node) {
-    // 获取子元素
-    return node.children;
-  },
-  sibling(node) {
-    // 获取兄弟姐妹
-    return Array.from(node.parentNode.children).filter(n !== node);
-  },
-  next(node) {
-    // 获取弟弟
-    let x = node.nextSibling;
-    while (x && x.nodeType === 3) {
-      x = x.nextSibling;
-    }
-    return x;
-  },
-  previous(node) {
-    // 获取哥哥
-    let x = node.previousSibling;
-    while (x && x.nodeType === 3) {
-      x = x.previousSibling;
-    }
-    return x;
-  },
-  each(nodeList, fn) {
-    // 获取所有结点
-    for (let i = 0; i < nodeList.length; i++) {
-      fn.call(null, nodeList[i]);
+  text(node, string) {
+    // 重载
+    if (arguments.length === 1) {
+      // 适配
+      return document.all ? node.innerText : node.textContent;
+    } else if (arguments.length === 2) {
+      document.all ? (node.innerText = string) : (node.textContent = string);
     }
   },
-  index(node) {
-    // 获取排行老几
-    const list = dom.children(node.parentNode);
-    for (let i = 0; i < list.length; i++) {
-      if (list[i] === node) {
-        return i;
-      }
+  html(node, string) {
+    // 重载
+    if (arguments.length === 1) {
+      return node.innerHTML;
+    } else if (arguments.length === 2) {
+      node.innerHTML = string;
     }
+  },
+  on(node, eventType, listener, useCapture = false) {
+    node.addEventListener(eventType, listener, useCapture);
+  },
+  off(node, eventType, listener, useCapture = false) {
+    node.removeEventListener(eventType, listener, useCapture);
   },
 };
+const info = `DOM 库（对象风格）
+使用方法参见：https://www.yuque.com/woozyzzz/ybz8i1/yo9rg6`;
+console.log(info);

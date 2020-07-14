@@ -1,26 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>封装DOM测试</title>
+    <title>封装 DOM 测试</title>
     <style>
-      #test {
-        border: 1px solid black;
+      /* reset */
+      * {
+        box-sizing: border-box;
       }
     </style>
   </head>
-
   <body>
-    <div id="init">DOM示例</div>
-    <div id="test">
-      <div class="red" id="a">a</div>
-      <div class="red" id="b">b</div>
-      <div class="red" id="c">c</div>
-    </div>
+    <article>
+      <header>
+        <h1>封装 DOM 库（对象风格）</h1>
+        <p>请打开浏览器开发者工具测试</p>
+      </header>
+      <main>
+        <section>
+          <h2></h2>
+          <div></div>
+        </section>
+        <section>
+          <h2></h2>
+          <div></div>
+        </section>
+      </main>
+    </article>
     <script src="dom.js"></script>
     <script src="main.js"></script>
   </body>
